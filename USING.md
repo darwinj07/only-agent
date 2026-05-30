@@ -8,7 +8,7 @@ Knowledge in only-agent is filesystem-shaped. A topic is either:
 - A **leaf**: one file (e.g. `context/work/team.md`)
 - A **branch**: an index file plus a sibling directory of leaves (e.g. `context/work/team.md` + `context/work/team/`)
 
-When a leaf gets too big, it splits into a branch. When you say "record this," ask the agent to put it in the right node. `/maintain` enforces this over time.
+When a leaf gets too big, it splits into a branch, and the agent files new knowledge in the right node. `/maintain` enforces this over time.
 
 Full mental model: [notes/architecture.md](./notes/architecture.md).
 
@@ -36,11 +36,9 @@ The agent reads `context/index.md`, picks the right domain, and demand-loads the
 
 Compresses, deduplicates, fixes stale references. Catches bloat before sessions slow down. ~2 min.
 
-## 3. Tell the agent to record knowledge mid-session
+## 3. It learns as you correct it
 
-When you correct the agent or share a new fact, it does NOT automatically write it down. Say explicitly: **"record this."** Otherwise the lesson dies with the session.
-
-> This is the #1 usage gap. Until it is automated, the burden is yours.
+When you correct the agent or share a new fact, it encodes the lesson into the right file - a universal preference in `learnings.md`, a domain fact in that domain's leaf - so the next session starts with it. `/maintain` keeps those files clean over time.
 
 ## 4. Tell the agent to remove misleading knowledge
 
@@ -108,7 +106,6 @@ These are about Claude Code itself, not only-agent. Worth doing once.
 |---------|-----|
 | Agent loaded wrong context | "load `<specific file>`", then `/maintain` |
 | Session too long | `/clear` - persistent context survives, fresh session restarts smarter |
-| New tool or workflow you want remembered | "record how to use X" mid-session |
 | Rules file getting bloated | `/maintain` flags scope errors and dead anti-patterns |
 | Agent stops before finishing analysis | Wrap the task: "don't stop until you've researched every angle" |
 

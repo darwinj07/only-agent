@@ -26,7 +26,7 @@ what was the bug we fixed last week in the payment service?
 
 **What happens**: Agent reads `context/work/codebase.md` -> finds the payment service -> surfaces what it knows. No vector store. The filesystem IS the index.
 
-If you've been recording lessons, the bug + fix lives in `context/work/payment-service/issues.md`. It loads only when relevant.
+If it's in your tree, the bug + fix lives in `context/work/payment-service/issues.md`. It loads only when relevant.
 
 ---
 
@@ -64,14 +64,14 @@ Run weekly. The system stays fast across thousands of sessions.
 
 ---
 
-## 6. "Remember this" (record knowledge mid-session)
+## 6. Teaching it something mid-session
 
 ```
-record this: the staging deploy needs --no-cache when the protobuf changes,
+the staging deploy needs --no-cache when the protobuf changes,
 otherwise it picks up cached generated code
 ```
 
-**What happens**: Agent picks the right leaf (`context/work/codebase.md` or `context/work/deploy.md` if it exists), appends the rule under the right section. Next session, you ask "how do I deploy staging?" and that note loads automatically.
+**What happens**: The agent files the fact in the right leaf (`context/work/codebase.md`, or `context/work/deploy.md` if it exists) under the right section. Next session, you ask "how do I deploy staging?" and that note loads automatically.
 
 ---
 

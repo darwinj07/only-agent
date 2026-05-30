@@ -131,7 +131,6 @@ Closest published analog: **RAPTOR** (tree of hierarchical summaries). Key diffe
 - Subtree maintenance - `/maintain` on a single subtree works regardless of total tree size
 
 **Scaling limits:**
-- **Cross-cutting queries** - "find everything about X across all subtrees" requires reading every index. Trees are great for drill-down, poor for lateral search. At scale, augment with semantic search (grep/vector similarity) as a fallback.
 - **Curation bottleneck** - one agent can maintain structure while it fits in context. Beyond that, needs subtree ownership (agents that maintain branches independently).
 - **Staleness compounds** - stale indexes in one subtree silently hide content. Larger trees need more aggressive staleness detection.
 

@@ -53,7 +53,7 @@ claude
 Then either:
 - Connect services: `"walk me through notes/connections.md"` (Slack, Notion, Jira, Datadog, Google Workspace, etc.)
 - Build your work tree: `/onboard --quick` for a 10-15 min taste (~$1-2), or `/onboard` for the full 1-3 hour sweep across every connected service.
-- Or just start working - context builds as you correct it. Today, the agent does NOT auto-record lessons; say "record this" to make a note stick. See [USING.md](./USING.md) for the day-to-day workflow.
+- Or just start working - context builds as you correct it. See [USING.md](./USING.md) for the day-to-day workflow.
 
 See [EXAMPLES.md](./EXAMPLES.md) for sample prompts that demonstrate dynamic context loading.
 
@@ -70,9 +70,7 @@ codebase.md  (32KB, bloated)   ->   codebase.md   (index, ~20 lines)
                                      codebase/deploy.md
 ```
 
-The agent navigates it with the same `Read`, `Glob`, and `Grep` it uses on your code. You can read your agent's entire memory in an editor, grep it in a shell, and diff it in git. That is the whole storage engine.
-
-It is built for drill-down, so it is weaker at cross-cutting search: "what do I know about checkout-svc" is fast, but "everywhere I ever mentioned retries" falls back to `grep`. ([how and why](./notes/tree-primitive.md))
+The agent navigates it with the same `Read`, `Glob`, and `Grep` it uses on your code. You can read your agent's entire memory in an editor, grep it in a shell, and diff it in git. That is the whole storage engine. ([how and why](./notes/tree-primitive.md))
 
 ## Skills
 

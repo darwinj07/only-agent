@@ -121,7 +121,6 @@ The tree primitive must layer on top without conflicting. The sibling pattern ac
 ## Constraints and Tradeoffs
 
 ### What the filesystem can't do
-- **Cross-cutting queries**: "find everything about iOS across all subtrees" requires reading every index or falling back to Grep. Trees are great for drill-down, bad for lateral search.
 - **Semantic linking**: a note in `context/work/` can't natively "link" to one in `context/personal/`. Pointers are manual (write the path).
 - **Atomic updates**: moving a node means updating both the file AND all pointers to it. No referential integrity.
 
@@ -169,7 +168,7 @@ Their content should be **orientation, not depth**. Inline what changes behavior
 
 ## Cross-References
 
-The tree primitive handles vertical navigation (drill-down via indexes). Cross-references add lateral discovery - "what else relates to this?" - using filesystem-native HTML comments.
+Cross-references connect related nodes across the tree - "what else relates to this?" - using filesystem-native HTML comments.
 
 ### Convention
 
