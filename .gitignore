@@ -1,0 +1,12 @@
+scratch/
+context/.session-count
+context/.session-start
+reference/*/
+projects/*
+!projects/.gitkeep
+*.pyc
+__pycache__/
+.env
+*.token
+token.json
+.DS_Store
