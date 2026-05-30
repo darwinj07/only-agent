@@ -42,13 +42,13 @@ esac
 BASENAME=$(basename "$FILE_PATH")
 NAME="${BASENAME%.md}"
 PARENT_DIR=$(dirname "$FILE_PATH")
-SIBLING_DIR="${PARENT_DIR}/.${NAME}"
+SIBLING_DIR="${PARENT_DIR}/${NAME}"
 
 MSGS=""
 msg() { MSGS="${MSGS}$1\n"; }
 
 # --- Tree governance detection ---
-# A file is tree-governed if it has a hidden sibling dir (.name/ next to name.md).
+# A file is tree-governed if it has a sibling dir (name/ next to name.md).
 # No sibling dir = just a file (not tree-governed, no size warnings).
 # Skip index.md - it's inside its branch dir, not a sibling pattern.
 HAS_SIBLING=false
@@ -80,7 +80,7 @@ if [ "$MODE" = "read" ]; then
     if [ "$HAS_BRANCH" = true ]; then
         msg "TREE: branch index for ${SIBLING_DIR#$PROJECT_DIR/}/ ($LEAF_COUNT leaves: $LEAF_NAMES)"
     elif [ "$HAS_SIBLING" = true ]; then
-        msg "TREE: governed node (.${NAME}/ exists, ready for split)"
+        msg "TREE: governed node (${NAME}/ exists, ready for split)"
     fi
 
     # Surface cross-references
@@ -96,8 +96,8 @@ if [ "$MODE" = "write" ]; then
 
     if [ "$HAS_BRANCH" = true ]; then
         # Branch index: strict 5KB limit
-        if [ "$BYTES" -gt 5120 ]; then
-            msg "TREE: $RELPATH is $(( (BYTES+512)/1024 ))KB (index limit 5KB). Branch has $LEAF_COUNT leaves: $LEAF_NAMES. Move depth content to a leaf in ${SIBLING_DIR#$PROJECT_DIR/}/."
+        if [ "$BYTES" -gt 8192 ]; then
+            msg "TREE: $RELPATH is $(( (BYTES+512)/1024 ))KB (index soft signal 8KB). Branch has $LEAF_COUNT leaves: $LEAF_NAMES. If depth is piling up, move it to a leaf in ${SIBLING_DIR#$PROJECT_DIR/}/."
         fi
 
         # Check for unreferenced leaves
@@ -115,15 +115,17 @@ if [ "$MODE" = "write" ]; then
         fi
 
     elif [ "$HAS_SIBLING" = true ]; then
-        # Tree-governed leaf (empty sibling dir, pre-staged for split): 10KB limit
-        if [ "$BYTES" -gt 10240 ]; then
-            msg "TREE: $RELPATH is $(( (BYTES+512)/1024 ))KB (limit 10KB). .${NAME}/ exists - split into leaves."
+        # Tree-governed leaf (empty sibling dir, pre-staged for split): 20KB soft, 30KB hard
+        if [ "$BYTES" -gt 30720 ]; then
+            msg "TREE: $RELPATH is $(( (BYTES+512)/1024 ))KB (HARD CAP 30KB). ${NAME}/ exists - split into leaves."
+        elif [ "$BYTES" -gt 20480 ]; then
+            msg "TREE: $RELPATH is $(( (BYTES+512)/1024 ))KB (soft signal 20KB). ${NAME}/ exists - if multiple distinct sections, split into leaves."
         fi
 
     elif [ "$BASENAME" = "index.md" ]; then
         # Legacy index.md pattern
-        if [ "$BYTES" -gt 5120 ]; then
-            msg "TREE: $RELPATH is $(( (BYTES+512)/1024 ))KB (index limit 5KB). Consider decomposing."
+        if [ "$BYTES" -gt 8192 ]; then
+            msg "TREE: $RELPATH is $(( (BYTES+512)/1024 ))KB (index soft signal 8KB). Consider decomposing."
         fi
 
     fi

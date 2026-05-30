@@ -43,7 +43,7 @@ Before (leaf):
 
 After (branch):
   api-traps.md              ← index (orientation, pointers, ~20 lines)
-  .api-traps/               ← hidden leaves dir (depth)
+  api-traps/               ← leaves dir (depth)
     google-docs.md
     slack.md
     linkedin.md
@@ -55,7 +55,7 @@ The file stays. A sibling directory appears. The address (`api-traps.md`) never 
 
 The alternative (replacing `foo.md` with `foo/index.md`) breaks external dependencies. MEMORY.md can't become `memory/index.md` because Claude Code auto-loads `MEMORY.md` specifically. README.md can't move because GitHub renders it. CLAUDE.md can't move because Claude Code expects it at the project root.
 
-The sibling pattern (`name.md` + `.name/`) preserves the file AND adds structure. It's additive, not destructive. The dot prefix prevents conflicts with non-tree directories (a `work/` source dir won't be mistaken for a tree branch).
+The sibling pattern (`name.md` + `name/`) preserves the file AND adds structure. It's additive, not destructive. The file is the marker: a branch is a `name.md` paired with a `name/` directory. A bare `work/` source dir with no `work.md` beside it is just a directory, not a tree branch - so the pattern coexists with ordinary source folders.
 
 **Navigation advantage**: When an LLM lists a directory, it sees both index files and subdirectories at the same level. Each `.md` file orients; each sibling directory offers depth. With `index.md` inside directories, the LLM must enter each directory to find its identity - an extra navigation step at every level.
 
@@ -73,9 +73,9 @@ First match wins. Writing new nodes: always use the sibling pattern.
 | Operation | Description |
 |-----------|-------------|
 | **Read** | Read `name.md`. If it contains pointers, follow them into `name/`. |
-| **Split** | File exceeds budget. Create `.name/`, extract subtopics as leaves, rewrite `name.md` as index. |
+| **Split** | File exceeds budget. Create `name/`, extract subtopics as leaves, rewrite `name.md` as index. |
 | **Collapse** | Directory has only trivial leaves. Merge content back into `name.md`, remove directory. |
-| **Grow** | Add a new leaf to `.name/`. Update `name.md` index if needed. |
+| **Grow** | Add a new leaf to `name/`. Update `name.md` index if needed. |
 
 ## Sizing: soft signals, not hard gates
 
@@ -104,7 +104,7 @@ This means file boundaries ARE the chunking strategy. Smaller, focused files = b
 The LLM's tool palette for navigation:
 - `Glob("context/**/*.md")` - find all knowledge files
 - `Read("context/work.md")` - read an index
-- `Grep("MPID", "context/.work/")` - search within a subtree
+- `Grep("MPID", "context/work/")` - search within a subtree
 
 No custom tools needed. No query language. The agent uses the same tools for knowledge navigation and code exploration. This is the filesystem's killer advantage: zero impedance mismatch.
 
@@ -122,7 +122,7 @@ The tree primitive must layer on top without conflicting. The sibling pattern ac
 
 ### What the filesystem can't do
 - **Cross-cutting queries**: "find everything about iOS across all subtrees" requires reading every index or falling back to Grep. Trees are great for drill-down, bad for lateral search.
-- **Semantic linking**: a note in `context/.work/` can't natively "link" to one in `context/.personal/`. Pointers are manual (write the path).
+- **Semantic linking**: a note in `context/work/` can't natively "link" to one in `context/personal/`. Pointers are manual (write the path).
 - **Atomic updates**: moving a node means updating both the file AND all pointers to it. No referential integrity.
 
 ### What it does well
@@ -140,7 +140,7 @@ The tree primitive is not a knowledge management system. It's a scaling layer fo
 - **Project context** - project hubs, architecture docs, design specs. Any file that deepens over time.
 - **Configuration** - CLAUDE.md, rules files. As the system evolves, these grow too.
 
-The pattern is always the same: file exceeds budget -> split into branch (keep index, create `.name/` with leaves) -> address stays stable -> recursive if needed. One operation handles all growth.
+The pattern is always the same: file exceeds budget -> split into branch (keep index, create `name/` with leaves) -> address stays stable -> recursive if needed. One operation handles all growth.
 
 **Why this matters**: Every persistent LLM workspace will hit the growth wall. The tree primitive is the first systematic answer that's filesystem-native (no infrastructure), self-maintaining (hooks detect when splits are needed), compatible (doesn't break anything), and recursive (handles arbitrary depth). It's not a convention for this workspace - it's a general architecture.
 
@@ -151,7 +151,7 @@ Current applications:
 | Instance | Index file | Sibling dir | Leaves | Split trigger |
 |----------|-----------|-------------|--------|---------------|
 | MEMORY.md | `MEMORY.md` | `memory/` | Topic-specific trap files | Node > ~50 lines |
-| Domain knowledge | `context/work.md` | `context/.work/` | Domain context files | New subtopic |
+| Domain knowledge | `context/work.md` | `context/work/` | Domain context files | New subtopic |
 | System docs | `notes/architecture.md` | `notes/architecture/` (if needed) | Deep-dive sections | Node > ~20KB and multi-topic |
 | Session state | `scratch/session/index.md` | (within dir) | `completed/`, `research/` | Session outgrows one file |
 | Code repos | `README.md` | (the repo itself) | Source files, packages | N/A (external convention) |
@@ -174,7 +174,7 @@ The tree primitive handles vertical navigation (drill-down via indexes). Cross-r
 ### Convention
 
 ```markdown
-<!-- related: context/.work/built-tools.md, notes/architecture.md -->
+<!-- related: context/work/built-tools.md, notes/architecture.md -->
 ```
 
 - **Format**: `<!-- related: path1, path2, ... -->` - comma-separated, paths relative to workspace root
