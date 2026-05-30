@@ -79,14 +79,13 @@ For entries in `context/self-assessment.md` and `context/<domain>/self-assessmen
 - Sync index with disk: add files not in index, remove entries for deleted files.
 - Update staleness flags and dates.
 
-### 6. Decompose oversized files
+### 6. Split oversized files (soft signal, not a hard gate)
 
-After compression, check if any context file exceeds 10KB:
-- Split into directory subtree: `<name>/index.md` (overview + leaf pointers) + leaf files
-- Index includes a "Leaves" table with "read when..." guidance (same format as domain indexes)
-- Leaf files contain the detailed content, organized by logical boundary
-- Update parent index to point to new `<name>/index.md` instead of the old monolithic file
-- Delete the original monolithic file
+Sizing is a signal, not a rule. A cohesive single-topic file can run long - splitting it just creates artificial navigation hops between things that belong together. Split only when a file is BOTH over budget AND covers multiple distinct `## ` sections that don't heavily cross-reference.
+
+Budgets: knowledge leaves ~20KB soft / 30KB hard cap; indexes ~8KB soft; Layer 1 (`.claude/rules/*.md`) ~10KB.
+
+To split: create the `name/` subtree, extract each section as a leaf, rewrite `name.md` as an index (overview + a "Leaves" table with "read when..." guidance), and point the parent index at it. Report what you split, not what you considered.
 
 ### 7. Structural review
 
@@ -112,6 +111,15 @@ Print summary:
 - Index corrections
 - Structural proposals (with rationale)
 - Anything needing user input
+
+### 9. Reset the maintenance tracker
+
+Last action of every run. Reset the counter the SessionStart hook (`scripts/session-audit.sh`) reads - without this, "N sessions since last /maintain" counts forever and the warning means nothing:
+
+```
+echo 0 > "$CLAUDE_PROJECT_DIR/context/.session-count"
+date +%Y-%m-%d > "$CLAUDE_PROJECT_DIR/context/.last-maintain"
+```
 
 ## Anti-patterns
 

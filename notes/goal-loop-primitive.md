@@ -8,6 +8,21 @@ Abstract principles ("don't ship claims built on uncertainty", "don't stop befor
 
 The fix is structural: the harness blocks `Stop` until a machine-checkable or model-asserted condition is met.
 
+## goal-loop vs Claude Code's /goal
+
+Claude Code ships a built-in `/goal`: set a completion condition and a fast model re-reads the **transcript** after each turn, auto-continuing until it judges the goal met. It is an excellent autonomy driver. It is not a correctness gate.
+
+The difference is what gets checked:
+
+| | Checks | Fooled by | Good for |
+|---|--------|-----------|----------|
+| **`/goal`** (built-in) | the transcript - what the agent *said* | an agent that confidently narrates success over broken code | keeping the agent moving without re-prompting |
+| **goal-loop** (this) | a command's exit code, or a named gate the agent must assert | much less - "the test exited 0" is a fact, not a claim | shipping something that has to actually be correct |
+
+`/goal` asks "does it look done?"; goal-loop asks "did `bun test` exit 0?" Anyone who has used an agent has watched it declare victory on code that does not compile - that gap is the whole reason this exists.
+
+They compose, and the strongest setup uses both: drive with `/goal` for autonomy, gate with goal-loop for correctness. Let the built-in keep the agent working; let the command gate decide when it is allowed to stop.
+
 ## Shape
 
 A goal-loop is defined by two parts:

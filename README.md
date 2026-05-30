@@ -81,7 +81,7 @@ You don't have to type the slash command - say "set up my workspace" and `/onboa
 
 **/onboard.** Run once after bootstrap. Spawns parallel agents across the resources you have connected (repos, tickets, docs, monitoring, data) to build a working knowledge tree in 1-3 hours. Self-assesses readiness, closes gaps, hands back a report. Adapts to whatever services you have connected. **`/onboard --quick`** runs a single Codebase agent in 10-15 min (~$1-2) for evaluators who don't want to commit the full sweep yet. ([details](./.claude/skills/onboard/SKILL.md))
 
-**Goal-loop with pluggable gates.** `/goal-loop` enforces a Stop-hook gate: the agent can't end its turn until verification passes. The gate is whatever you describe in natural language - shell command (`bun test`), isolated agent reviewer (`claude -p "review this diff"`), or model self-check (every uncertainty resolved). One skill, three gate types, no separate commands to memorize. ([spec](./notes/goal-loop-primitive.md))
+**Goal-loop: verify with commands, not vibes.** Claude Code's built-in `/goal` re-reads the *transcript* and continues until the agent's words look done - great for autonomy, but it trusts what the agent *says*. `/goal-loop` enforces a Stop-hook gate the agent cannot talk its way past: it runs your actual check - `bun test`, a build, a reviewer `claude -p "review this diff"`, or a model self-check - and only a passing exit code (or an explicitly asserted gate) ends the turn. If you have ever watched an agent declare victory on code that doesn't compile, that is the gap this closes. Drive with `/goal`, gate with `/goal-loop`. ([spec](./notes/goal-loop-primitive.md))
 
 ---
 

@@ -68,6 +68,7 @@ Every filesystem path is a tree node.
 - **Branch**: a file + sibling directory. `name.md` (index) + `name/` (leaves).
 - **Split**: leaf outgrows its budget -> create `name/`, extract subtopics, rewrite file as index.
 - **Resolve**: to read node `foo`, check `foo.md` then `foo/index.md`.
+- **Sizing (soft signal)**: leaves ~20KB / 30KB hard, indexes ~8KB, Layer 1 ~10KB. Over budget AND multi-section -> split; cohesive single-topic -> leave it.
 
 Design rationale: `notes/tree-primitive.md`.
 

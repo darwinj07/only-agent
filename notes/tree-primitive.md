@@ -39,7 +39,7 @@ When a leaf outgrows its budget, it splits into a branch:
 
 ```
 Before (leaf):
-  api-traps.md              ← single file, 15KB, too big
+  api-traps.md              ← single file, 35KB, five unrelated topics
 
 After (branch):
   api-traps.md              ← index (orientation, pointers, ~20 lines)
@@ -76,6 +76,20 @@ First match wins. Writing new nodes: always use the sibling pattern.
 | **Split** | File exceeds budget. Create `.name/`, extract subtopics as leaves, rewrite `name.md` as index. |
 | **Collapse** | Directory has only trivial leaves. Merge content back into `name.md`, remove directory. |
 | **Grow** | Add a new leaf to `.name/`. Update `name.md` index if needed. |
+
+## Sizing: soft signals, not hard gates
+
+Every node has a budget, but the budget is a signal - not a law:
+
+| Node | Soft signal | Hard cap |
+|------|-------------|----------|
+| Knowledge leaf | 20KB | 30KB (always split) |
+| Branch index | 8KB | - |
+| Layer 1 rule file | 10KB | - |
+
+Hooks warn at the soft signal; they do not block. The split decision is the model's: a cohesive single-topic file at 25KB is fine - splitting it creates artificial hops between things that belong together. Split only when a file is BOTH over budget AND covers multiple distinct `## ` sections.
+
+**Why soft, not hard** (learned the hard way): an earlier version used tighter hard limits (10KB leaf, 5KB index), and the maintenance pass would dutifully split cohesive files just to satisfy the number - the "harmful split." A 12KB file on one subject became two 6KB halves the model then had to load and stitch back together. Bigger budgets plus a content-judgment rule beat a smaller hard cap every time.
 
 ## Why This Works for LLMs
 
@@ -138,7 +152,7 @@ Current applications:
 |----------|-----------|-------------|--------|---------------|
 | MEMORY.md | `MEMORY.md` | `memory/` | Topic-specific trap files | Node > ~50 lines |
 | Domain knowledge | `context/work.md` | `context/.work/` | Domain context files | New subtopic |
-| System docs | `notes/architecture.md` | `notes/architecture/` (if needed) | Deep-dive sections | Node > ~10KB |
+| System docs | `notes/architecture.md` | `notes/architecture/` (if needed) | Deep-dive sections | Node > ~20KB and multi-topic |
 | Session state | `scratch/session/index.md` | (within dir) | `completed/`, `research/` | Session outgrows one file |
 | Code repos | `README.md` | (the repo itself) | Source files, packages | N/A (external convention) |
 
