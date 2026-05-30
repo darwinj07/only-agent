@@ -1,8 +1,8 @@
 # only-agent
 
-> The only agent you need.
+> The only agent you will ever need. One workspace and one agent for all your repos, tickets, and docs - no more switching between Claude Code projects.
 
-Most setups today fragment AI into one Claude Code project per code repo. Switch repos, switch context, lose memory. **only-agent rejects that.** A single workspace where one general-purpose agent learns your environment and routes its own context across every repo, ticket, doc, and conversation.
+Most people run a separate Claude Code project per repo. You switch repos, switch context, and re-explain your stack. **only-agent rejects that.** A single workspace where one general-purpose agent learns your environment and routes its own context across every repo, ticket, doc, and conversation - ever-growing along with you.
 
 - **Dynamic context loading** - The agent demand-loads what it needs from a knowledge tree shaped to your work. No per-repo Claude Code projects to maintain.
 - **Self-organizing memory** - Knowledge accumulates as you work. When a topic outgrows its file, the system splits it into a subtree. `/maintain` compresses, deduplicates, fixes drift. Memory grows without slowing down.
@@ -59,29 +59,39 @@ See [EXAMPLES.md](./EXAMPLES.md) for sample prompts that demonstrate dynamic con
 
 ---
 
+## The filesystem is the index
+
+No vector database, no embeddings, no retrieval service. Knowledge is plain markdown in a tree: `topic.md` is an index, `topic/*.md` are the leaves. When a leaf gets too big it splits, and its path stays the same so nothing that points at it breaks:
+
+```text
+codebase.md  (32KB, bloated)   ->   codebase.md   (index, ~20 lines)
+                                     codebase/checkout-svc.md
+                                     codebase/mobile-api.md
+                                     codebase/deploy.md
+```
+
+The agent navigates it with the same `Read`, `Glob`, and `Grep` it uses on your code. You can read your agent's entire memory in an editor, grep it in a shell, and diff it in git. That is the whole storage engine.
+
+It is built for drill-down, so it is weaker at cross-cutting search: "what do I know about checkout-svc" is fast, but "everywhere I ever mentioned retries" falls back to `grep`. ([how and why](./notes/tree-primitive.md))
+
 ## Skills
 
-Three skills, all agent-invocable from natural language:
+Three, all invocable from plain English - the slash command is just the explicit form.
 
-| Skill | When |
-|-------|------|
-| `/onboard` | First run after bootstrap - build initial work tree from real resources |
-| `/maintain` | Weekly cleanup - compress, deduplicate, fix stale references |
-| `/goal-loop` | Force the agent to keep iterating until a verification gate passes |
+| Skill | Say something like | What it does |
+|-------|--------------------|--------------|
+| `/onboard` | "set up my workspace" | Spawns parallel agents across your connected resources to build your initial tree. |
+| `/maintain` | "clean up the workspace" | Weekly pass: compress, deduplicate, fix stale references, split oversized files. |
+| `/goal-loop` | "don't stop until tests pass" | Will not let the agent end its turn until a real check passes. |
 
-You don't have to type the slash command - say "set up my workspace" and `/onboard` activates. Say "clean up this mess" and `/maintain` activates. Say "don't stop until tests pass" and `/goal-loop` activates with a shell gate.
+`/goal-loop` is worth one extra note. Claude Code's built-in `/goal` re-reads the transcript and stops when the agent's words look done - it trusts what the agent says. `/goal-loop` runs your actual command (`go test ./...`, a build, a linter, a `claude -p` reviewer) and only a passing exit code ends the turn. If you've ever watched an agent declare victory on code that doesn't compile, that's the gap it closes. Drive with `/goal`, gate with `/goal-loop`. ([spec](./notes/goal-loop-primitive.md))
+
 
 ---
 
-## What makes it different
+## Isn't this just a big CLAUDE.md?
 
-**Tree primitive.** All persistent knowledge is a tree: `topic.md` is an index, `topic/*.md` are leaves. Outgrows its size budget? The leaf splits into a subtree. The model navigates by reading indexes and demand-loading leaves. No vector store needed - the filesystem IS the index. ([details](./notes/tree-primitive.md))
-
-**Self-maintaining.** `/maintain` walks the tree, compresses always-loaded files ruthlessly, deduplicates across files, fixes broken refs, splits oversized nodes. Knowledge stays clean across thousands of sessions.
-
-**/onboard.** Run once after bootstrap. Spawns parallel agents across the resources you have connected (repos, tickets, docs, monitoring, data) to build a working knowledge tree in 1-3 hours. Self-assesses readiness, closes gaps, hands back a report. Adapts to whatever services you have connected. **`/onboard --quick`** runs a single Codebase agent in 10-15 min (~$1-2) for evaluators who don't want to commit the full sweep yet. ([details](./.claude/skills/onboard/SKILL.md))
-
-**Goal-loop: verify with commands, not vibes.** Claude Code's built-in `/goal` re-reads the *transcript* and continues until the agent's words look done - great for autonomy, but it trusts what the agent *says*. `/goal-loop` enforces a Stop-hook gate the agent cannot talk its way past: it runs your actual check - `bun test`, a build, a reviewer `claude -p "review this diff"`, or a model self-check - and only a passing exit code (or an explicitly asserted gate) ends the turn. If you have ever watched an agent declare victory on code that doesn't compile, that is the gap this closes. Drive with `/goal`, gate with `/goal-loop`. ([spec](./notes/goal-loop-primitive.md))
+Close to the opposite. A `CLAUDE.md` loads in full every session and only grows. only-agent keeps the always-loaded part tiny (the router) and demand-loads the rest, so it stays fast as the knowledge grows. `/maintain` keeps the loaded files compressed and free of drift.
 
 ---
 
@@ -100,7 +110,7 @@ notes/connections.md           # Service connection guide
 notes/tree-primitive.md        # Storage model
 notes/goal-loop-primitive.md   # Gated output loops spec
 projects/                      # Symlinks to your repos (created during bootstrap)
-tools/                         # Custom-built tools (slack, github helpers)
+tools/                         # Custom-built tools (github helpers)
 scripts/                       # Hook scripts
 ```
 
@@ -112,11 +122,6 @@ scripts/                       # Hook scripts
 - **Earn your tokens.** Anything auto-loaded must justify its cost every session.
 - **The model is the system.** The runtime is a ceiling, not a floor. Thinnest possible infrastructure, maximum model.
 - **System and instance never mix.** Replace the user and their projects: system files still work, instance files don't.
-
-The 3 operating principles in [self.md](./.claude/rules/self.md):
-1. **Depth over speed** - map before moving, demand-load, converge.
-2. **Every observation becomes an action** - encode immediately, logs are queues.
-3. **Seek what you're not seeing** - external perspective, patterns as signals.
 
 ---
 
